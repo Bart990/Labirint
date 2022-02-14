@@ -220,7 +220,7 @@ while running:
         start_screen()
     elif stad == 2:
         start_time = pygame.time.get_ticks()
-        maze(screen, "map4.txt")
+        maze(screen, "data/maps/map4.txt")
         finish_time = pygame.time.get_ticks()
     elif stad == 3:
         end(F"""Время:  {str((finish_time - start_time) // 60000)}:{str((finish_time - start_time) // 1000 % 60)}""")
