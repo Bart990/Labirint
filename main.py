@@ -5,7 +5,7 @@ import random
 
 global stad
 stad = 1
-size = width, height = 900, 550
+size = width, height = 900, 550  # Размер экрана
 screen = pygame.display.set_mode(size)
 running = True
 
@@ -19,7 +19,7 @@ def load_image(name, colorkey=None):
     return image
 
 
-def start_screen():
+def start_screen():  # Класс отвечающий за стартовый экран
     pygame.font.init()
     fon = pygame.transform.scale(load_image('fon.png'), size)
     screen.blit(fon, (0, 0))
@@ -43,7 +43,7 @@ def get_click(mouse_pos):
         stad = 2
 
 
-class Wall(pygame.sprite.Sprite):
+class Wall(pygame.sprite.Sprite):  # Класс отвечающий за создание стен
     image = load_image("wall.png")
 
     def __init__(self, x, y, *group):
@@ -54,11 +54,11 @@ class Wall(pygame.sprite.Sprite):
         self.rect.x = x
         self.rect.y = y - 50
 
-    def update(self, *cords):
+    def update(self, *cords):  # Обновление кординат объекта
         self.rect = self.rect.move(*cords)
 
 
-class Floor(pygame.sprite.Sprite):
+class Floor(pygame.sprite.Sprite):  # Класс отвечающий за создание пола
     image = load_image("floor.png")
 
     def __init__(self, x, y, *group):
@@ -68,11 +68,11 @@ class Floor(pygame.sprite.Sprite):
         self.rect.x = x
         self.rect.y = y
 
-    def update(self, *cords):
+    def update(self, *cords):  # Обновление кординат объекта
         self.rect = self.rect.move(*cords)
 
 
-class Finish(pygame.sprite.Sprite):
+class Finish(pygame.sprite.Sprite):  # Класс отвечающий за финиш(окончание уровня)
     image = load_image("Finish.png")
 
     def __init__(self, x, y, *group):
@@ -83,11 +83,11 @@ class Finish(pygame.sprite.Sprite):
         self.rect.x = x
         self.rect.y = y
 
-    def update(self, *cords):
+    def update(self, *cords):  # Обновление кординат объекта
         self.rect = self.rect.move(*cords)
 
 
-class Player(pygame.sprite.Sprite):
+class Player(pygame.sprite.Sprite):  # Класс отвечающий за игрока
     image = load_image("player.png")
     image_move = load_image("player_move.png")
 
@@ -99,23 +99,17 @@ class Player(pygame.sprite.Sprite):
         self.rect.x = x
         self.rect.y = y
 
-    def collide(self, object):
+    def collide(self, object):  # Взаимодействие с объектами
         for i in object:
             if pygame.sprite.collide_mask(self, i):
                 return True
         return False
 
-    def update(self, *cords):
+    def update(self, *cords):  # Обновление кординат объекта
         self.rect = self.rect.move(*cords)
 
-    def animation(self, move):
-        if move != (0, 0):
-            self.image = Player.image_move
-        else:
-            self.image = Player.image
 
-
-def maze(screen, map):
+def maze(screen, map):  # Основной клаас отвечающий за лабиринт
     global size
     back_color = "black"
     form = 50
@@ -176,11 +170,10 @@ def maze(screen, map):
         layer1_sprites.update(move)
         layer_for_finish.update(move)
         if player.collide(layer3_sprites):
-            move = -1 * move[0], -1 * move[1]
+            move = int(-1.1 * move[0]), int(-1.1 * move[1])
             layer3_sprites.update(move)
             layer1_sprites.update(move)
             layer_for_finish.update(move)
-        player.animation(move)
         layer1_sprites.draw(screen)
         layer3_sprites.draw(screen)
         layer_for_finish.draw(screen)
@@ -189,7 +182,7 @@ def maze(screen, map):
         pygame.display.flip()
 
 
-def end(time):
+def end(time):  # Конечный экран
     global size
     back_color = "black"
     screen.fill(pygame.Color(back_color))
