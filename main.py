@@ -1,7 +1,7 @@
 import pygame
 import os
 import sys
-
+import random
 
 global stad
 stad = 1
@@ -115,14 +115,17 @@ class Player(pygame.sprite.Sprite):
             self.image = Player.image
 
 
-def maze(screen):
+def maze(screen, map):
+    global size
+    back_color = "black"
     form = 50
     layer3_sprites = pygame.sprite.Group()
     layer2_sprites_standing = pygame.sprite.Group()
     layer1_sprites = pygame.sprite.Group()
     layer_for_finish = pygame.sprite.Group()
-    screen.fill(pygame.Color("grey"))
-    map = open("map1.txt", encoding="utf8").readlines()
+    screen.fill(pygame.Color(back_color))
+    map = open(map, encoding="utf8").readlines()
+    start_and_finish = []
     for y in range(len(map)):
         for x in range(len(map[y])):
             if map[y][x] == "W":
@@ -131,36 +134,42 @@ def maze(screen):
                 Floor(x * form, y * form, layer1_sprites)
             elif map[y][x] == "S":
                 Floor(x * form, y * form, layer1_sprites)
-                start_x, start_y = x, y
-            elif map[y][x] == "F":
-                Finish(x * form, y * form, layer_for_finish)
-                pass
-    player = Player(375, 375, layer2_sprites_standing)
-    Player(375, 375, layer2_sprites_standing)
-    layer1_sprites.update(start_x * -form + 400, start_y * -form + 425)
-    layer3_sprites.update(start_x * -form + 400, start_y * -form + 425)
-    layer_for_finish.update(start_x * -form + 400, start_y * -form + 425)
+                start_and_finish.append((x, y))
+    #                Finish(x * form, y * form, layer_for_finish)
+    cord = random.randint(0, len(start_and_finish) - 1)
+    start_x, start_y = start_and_finish[cord]
+    del start_and_finish[cord]
+    finish_x, finish_y = start_and_finish[random.randint(0, len(start_and_finish) - 1)]
+    Finish(finish_x * form, finish_y * form, layer_for_finish)
+    player = Player(size[0] // 2 - 25, size[1] // 2 - 50, layer2_sprites_standing)
+    Player(size[0] // 2 - 25, size[1] // 2 - 50, layer2_sprites_standing)
+    layer1_sprites.update(start_x * -form + size[0] // 2, start_y * -form + size[1] // 2)
+    layer3_sprites.update(start_x * -form + size[0] // 2, start_y * -form + size[1] // 2)
+    layer_for_finish.update(start_x * -form + size[0] // 2, start_y * -form + size[1] // 2)
     run = True
     clock = pygame.time.Clock()
-    v = 6
-    pygame.key.set_repeat(1, 10)
     fps = 60
+    v = 25
+    pygame.key.set_repeat(1, 5)
+    global stad
     while run:
         move = 0, 0
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                pygame.quit()
+                stad = 4
+                run = False
             if event.type == pygame.KEYDOWN and pygame.key.get_pressed()[pygame.K_UP]:
-                move = 0, int(v)
+                move = 0, int(v / (fps / 30))
             if event.type == pygame.KEYDOWN and pygame.key.get_pressed()[pygame.K_DOWN]:
-                move = 0, int(-v)
+                move = 0, int(-v / (fps / 30))
             if event.type == pygame.KEYDOWN and pygame.key.get_pressed()[pygame.K_LEFT]:
-                move = int(v), 0
+                move = int(v / (fps / 30)), 0
             if event.type == pygame.KEYDOWN and pygame.key.get_pressed()[pygame.K_RIGHT]:
-                move = int(-v), 0
+                move = int(-v / (fps / 30)), 0
         if player.collide(layer_for_finish):
+            stad = 3
             run = False
-        screen.fill(pygame.Color("grey"))
+        screen.fill(pygame.Color(back_color))
         if player.collide(layer3_sprites):
             move = -1 * move[0], -1 * move[1]
         layer3_sprites.update(move)
@@ -173,19 +182,39 @@ def maze(screen):
             layer_for_finish.update(move)
         player.animation(move)
         layer1_sprites.draw(screen)
+        layer3_sprites.draw(screen)
         layer_for_finish.draw(screen)
         layer2_sprites_standing.draw(screen)
-        layer3_sprites.draw(screen)
         clock.tick(fps)
         pygame.display.flip()
-        global stad
-        stad = 3
-    pass
 
 
-def end():
-    fon = pygame.transform.scale(load_image('end.png'), size)
-    screen.blit(fon, (0, 0))
+def end(time):
+    global size
+    back_color = "black"
+    screen.fill(pygame.Color(back_color))
+    font = pygame.font.Font(None, 50)
+    text = font.render(time, True, (100, 255, 100))
+    text_x = size[0] // 2 - text.get_width() // 2
+    text_y = size[1] // 2 - text.get_height() // 2
+    screen.blit(text, (text_x, text_y))
+    text = font.render("Заново", True, (100, 255, 100))
+    text_x = size[0] - text.get_width()
+    text_y = size[1] - text.get_height()
+    screen.blit(text, (text_x, text_y))
+    pygame.display.flip()
+    global stad
+    run = True
+    while run:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                stad = 4
+                run = False
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if size[0] - text.get_width() < event.pos[0] < size[0] and size[1] - text.get_height() < event.pos[1] < \
+                        size[1]:
+                    stad = 2
+                    run = False
 
 
 while running:
@@ -197,8 +226,12 @@ while running:
     if stad == 1:
         start_screen()
     elif stad == 2:
-        maze(screen)
+        start_time = pygame.time.get_ticks()
+        maze(screen, "map4.txt")
+        finish_time = pygame.time.get_ticks()
     elif stad == 3:
-        end()
+        end(F"""Время:  {str((finish_time - start_time) // 60000)}:{str((finish_time - start_time) // 1000 % 60)}""")
+    elif stad == 4:
+        running = False
     pygame.display.flip()
 pygame.quit()
