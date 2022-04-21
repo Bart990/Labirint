@@ -48,7 +48,6 @@ class Wall(pygame.sprite.Sprite):  # Класс отвечающий за соз
 
     def __init__(self, x, y, *group):
         super().__init__(*group)
-        self.image = Wall.image
         self.rect = self.image.get_rect()
         self.mask = pygame.mask.from_surface(self.image)
         self.rect.x = x
@@ -93,7 +92,7 @@ class Player(pygame.sprite.Sprite):  # Класс отвечающий за иг
 
     def __init__(self, x, y, *group):
         super().__init__(*group)
-        self.image = Player.image
+        self.image = self.image
         self.rect = self.image.get_rect()
         self.mask = pygame.mask.from_surface(self.image)
         self.rect.x = x
@@ -223,7 +222,7 @@ while running:
         maze(screen, "data/maps/map4.txt")
         finish_time = pygame.time.get_ticks()
     elif stad == 3:
-        end(F"""Время:  {str((finish_time - start_time) // 60000)}:{str((finish_time - start_time) // 1000 % 60)}""")
+        end(F"""Время:  {str((finish_time - start_time) // 60000)}минуты {str((finish_time - start_time) // 1000 % 60)} секунд""")
     elif stad == 4:
         running = False
     pygame.display.flip()
